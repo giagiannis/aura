@@ -15,7 +15,7 @@ TBA
 
 License
 -------
-Apache License 2.0, please refer to LICESE file for more details
+Apache License 2.0, please see the LICENSE file for more details.
 
 Contact
 -------
