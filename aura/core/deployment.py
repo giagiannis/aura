@@ -7,7 +7,7 @@ from threading import Thread
 import json
 
 class ApplicationDeployment:
-    def __init__(self, description_file):
+    def __init__(self, description_file, aura_configuration):
         desc = ApplicationDescriptionParser(description_file)
         self.__desc = desc.get_description()
         self.__queue = Queue()
@@ -21,7 +21,10 @@ class ApplicationDeployment:
 
         threads = []
         for m in self.__desc['modules']:
-            threads.append(Thread(target = create_vm_and_set_ip, args = (m,)))
+            if "address" not in m:
+                threads.append(Thread(target = create_vm_and_set_ip, args = (m,)))
+        if threads == []:
+            return
         for t in threads:
             t.start()
         for t in threads:
@@ -31,7 +34,7 @@ class ApplicationDeployment:
     def run_deployment(self):
         orchestrators = []
         for m in self.__desc['modules']:
-            o = VMOrchestrator(m['address'], self.__queue, m['scripts'], m['name'])
+            o = VMOrchestrator(self.__queue, m, aura_configuration['prv_key'])
             orchestrators.append(o)
 
         for o in orchestrators:
@@ -49,7 +52,8 @@ class ApplicationDeployment:
             t.join()
 
 if __name__ == "__main__":
+    aura_configuration =  {"prv_key": "private/image_key"}
     logging.basicConfig(level=logging.INFO)
-    a = ApplicationDeployment("example/demo.tar")
+    a = ApplicationDeployment("example/demo.tar", aura_configuration)
     a.allocate_resources()
     a.run_deployment()
