@@ -11,6 +11,7 @@ class ApplicationDeployment:
         desc = ApplicationDescriptionParser(description_file)
         self.__desc = desc.get_description()
         self.__queue = Queue()
+        self.__aura_conf = aura_configuration
 
     def allocate_resources(self):
         cloud_config = self.__desc['cloud-conf']
@@ -34,7 +35,7 @@ class ApplicationDeployment:
     def run_deployment(self):
         orchestrators = []
         for m in self.__desc['modules']:
-            o = VMOrchestrator(self.__queue, m, aura_configuration['prv_key'])
+            o = VMOrchestrator(self.__queue, m, self.__aura_conf['prv_key'])
             orchestrators.append(o)
 
         for o in orchestrators:
@@ -51,9 +52,4 @@ class ApplicationDeployment:
         for t in threads:
             t.join()
 
-if __name__ == "__main__":
-    aura_configuration =  {"prv_key": "private/image_key"}
-    logging.basicConfig(level=logging.INFO)
-    a = ApplicationDeployment("example/demo.tar", aura_configuration)
-    a.allocate_resources()
-    a.run_deployment()
+

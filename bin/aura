@@ -1,1 +1,18 @@
 #!/usr/bin/python
+from aura.core.deployment import ApplicationDeployment
+import logging
+from sys import argv
+import json
+
+if __name__ == "__main__":
+    if len(argv)< 3:
+        print "Provide description tar and server configuration file"
+        exit(0)
+    description_file = argv[1]
+    aura_configuration = json.load(open(argv[2]))
+    print aura_configuration
+
+    logging.basicConfig(level=logging.INFO)
+    a = ApplicationDeployment(description_file, aura_configuration)
+    a.allocate_resources()
+    a.run_deployment()
