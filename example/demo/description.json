@@ -1,0 +1,48 @@
+{
+	"name": "Demo app",
+	"modules": [{
+		"name": "one",
+		"image_id": "image-id",
+		"flavor_id": "flavor-id",
+		"scripts": [{
+			"seq": 1,
+			"file": "one/script1.sh",
+			"output": "two/2"
+		},
+		{
+			"seq": 2,
+			"file": "one/script2.sh"
+		},
+		{
+			"seq": 3,
+			"file": "one/script3.sh",
+			"input": "two/2"
+		}]
+	},
+	{
+		"name": "two",
+		"image_id": "image-id",
+		"flavor_id": "flavor-id",
+		"scripts": [{
+			"seq": 1,
+			"file": "two/script1.sh"
+		},
+		{
+			"input": "one/1",
+			"seq": 2,
+			"file": "two/script2.sh",
+			"output": "one/3"
+		},
+		{
+			"seq": 3,
+			"file": "two/script3.sh"
+		}]
+	}],
+	"cloud-conf": {
+		"version":"",
+		"username":"",
+		"password":"",
+		"project_id":"",
+		"auth_url":""
+	}
+}
