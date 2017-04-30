@@ -60,22 +60,21 @@ class VMOrchestrator:
             sleep(1.0)
 
     def execute_scripts(self):
-        # TODO: add implementation
         for s in self.__module['scripts']:
             self.__execute_script(s)
 
     def __execute_script(self, script):
-        logging.info("Script execution for %s: %s" % \
-                (self.__module['name'], script))
+        graph_node_id = "%s/%s" % (self.__module['name'], script['seq'])
+        logging.info("%s: starting script execution" % (graph_node_id))
+        args = None
         if "input" in script:
-            # have to wait until there
-            pass
-        self.__transfer_and_run(script['file-content'])
+            args = self.__queue.block_receive(graph_node_id, script['input'])
+        o,e = self.__transfer_and_run(script['file-content'], args)
         if "output" in script:
-            # have to wait until there
-            pass
+            self.__queue.send(graph_node_id, script['output'], o)
 
     def __setup_paramiko(self):
+        # FIXME: I need to set paramiko timeout option to enable long script execution
         try:
             k = paramiko.RSAKey.from_private_key_file(self.__prv_key)
             self.__ssh = paramiko.SSHClient()
@@ -91,19 +90,36 @@ class VMOrchestrator:
             logging.info("Paramiko connection failed")
             return False
 
-    def __transfer_and_run(self, content):
+    def __transfer_and_run(self, content, args=""):
+        """
+        Serializes the content parameter into a script, transfers it to the dst host and executes it.
+        It returns the stdout and stderr objects. args (if given) are the content of the file given as an 
+        argument to the script.
+        """
         # create temp file
+        script_file = self.__transfer_content(content)
+        args_file = self.__transfer_content(args)
+        self.__ssh.exec_command("chmod +x %s" % script_file)
+        stdin, stdout, stderr = self.__ssh.exec_command("%s %s" % (script_file, args_file))
+        stdout_str = stdout.read()
+        stderr_str = stderr.read()
+        logging.info("%s stdout: %s" % (script_file, stdout_str))
+        logging.info("%s stderr: %s" % (script_file, stderr_str))
+        return stdout_str, stderr_str
+
+    def __transfer_content(self, content):
+        """
+        Transfers the content to a randomly generated remote file and returns the dst file name.
+        """
+        logging.info("Trying to serialize content: %s", content)
+        if content == None:
+            return ""
         src_name = mktemp()
         with open(src_name, mode='w') as f:
             f.write(content)
         f.close()
         dst_name = mktemp()
-        logging.info("Serialized script's content to %s" % src_name)
+        logging.info("Serialized content to %s" % src_name)
         self.__scp.put(src_name, dst_name)
         logging.info("%s: Transfered %s to %s@%s" % (self.__module['name'], src_name, self.__module['address'], dst_name))
-        self.__ssh.exec_command("chmod +x %s" % dst_name)
-        stdin, stdout, stderr = self.__ssh.exec_command("%s" % dst_name)
-        stdout_str = stdout.read()
-        stderr_str = stderr.read()
-        logging.info("%s stdout: %s" % (dst_name, stdout_str))
-        logging.info("%s stderr: %s" % (dst_name, stderr_str))
+        return dst_name

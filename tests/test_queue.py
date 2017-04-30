@@ -1,5 +1,5 @@
 import unittest
-from aura.core.queue import Queue
+from aura.queue import Queue
 
 class TestQueue(unittest.TestCase):
     def test_send(self):

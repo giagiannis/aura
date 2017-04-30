@@ -1,5 +1,5 @@
 #!/usr/bin/python
-from aura.core.deployment import ApplicationDeployment
+from aura.deployment import ApplicationDeployment
 import logging
 from sys import argv
 import json
