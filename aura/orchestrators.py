@@ -5,6 +5,7 @@ from novaclient import client
 import paramiko
 import scp
 from tempfile import mkstemp, mktemp
+import os
 
 
 class CloudOrchestrator:
@@ -122,4 +123,5 @@ class VMOrchestrator:
         logging.info("Serialized content to %s" % src_name)
         self.__scp.put(src_name, dst_name)
         logging.info("%s: Transfered %s to %s@%s" % (self.__module['name'], src_name, self.__module['address'], dst_name))
+        os.remove(src_name)
         return dst_name
