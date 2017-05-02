@@ -1,10 +1,11 @@
 #!/usr/bin/python
 import logging
+from time import sleep
 from parsers import ApplicationDescriptionParser
 from orchestrators import CloudOrchestrator, VMOrchestrator
 from queue import Queue
 from threading import Thread
-import json
+from time import sleep
 
 class ApplicationDeployment:
     def __init__(self, description_file, aura_configuration):
@@ -30,7 +31,7 @@ class ApplicationDeployment:
             t.start()
         for t in threads:
             t.join()
-        logging.info("Allocation complete: %s" % json.dumps(self.__desc, indent=1))
+        logging.info("Allocation complete: %s" % self.__desc)
     
     def run_deployment(self):
         orchestrators = []
@@ -42,14 +43,32 @@ class ApplicationDeployment:
             o.wait_until_booted()
 
         # parallel orchestrator execution
+        self.__parallel_start_orchestrators(orchestrators)
+        
+        # checking for shit
+        while True:
+            logging.info("Heartbeat status %s" % (self.__desc))
+            finished_nodes = self.__queue.get_finished_nodes()
+            logging.info(finished_nodes)
+            if len(finished_nodes) == len(self.__desc['modules']):
+                logging.info("Breaking the loop")
+                break
+#            if self.__queue.get_health_check_request():
+#                self.__health_check_routine(orchestrators)
+            sleep(1.0)
+
+    def status(self):
+        return self.__desc
+
+
+    def __parallel_start_orchestrators(self, orchestrators, start_scripts= None):
+        logging.info("starting orchestrators in parallel")
         threads = []
         for o in orchestrators:
-            threads.append(Thread(target = o.execute_scripts))
-
+            seq='1'
+            if start_scripts!=None and o.name in start_scripts:
+                seq = start_scripts[o.name]
+            threads.append(Thread(target = o.execute_scripts, args=(seq,)))
         for t in threads:
             t.start()
-
-        for t in threads:
-            t.join()
-
-
+        return threads

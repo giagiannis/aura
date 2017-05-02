@@ -29,8 +29,6 @@ class CloudOrchestrator:
         """
         logging.info("%s: %s, %s, %s", "create_vm", flavor, image, key)
         vm = self.__client.servers.create(name=name, image=image, flavor=flavor)
-        sleep(1.0)
-        logging.info(vm.networks)
         while vm.networks == {}:
             sleep(1.0)
             vm.get()
@@ -45,6 +43,10 @@ class VMOrchestrator:
         self.__queue = queue
         self.__module = module
         self.__prv_key = key_file
+        self.name = module['name']
+        for s in self.__module['scripts']:
+            s['status'] = 'PENDING'
+
         
     def wait_until_booted(self):
         """
@@ -60,19 +62,47 @@ class VMOrchestrator:
                             return
             sleep(1.0)
 
-    def execute_scripts(self):
+    def execute_scripts(self, start):
         for s in self.__module['scripts']:
-            self.__execute_script(s)
+            if int(start) <= int(s['seq']):
+                s['status'] = 'EXECUTING'
+                status = self.__execute_script(s)
+                logging.info("Trying to execute %s, returned %s"% (s['file'], status))
+                if status and s['status'] == 'EXECUTING':
+                    s['status'] = 'DONE'
+                else:
+                    s['status'] = 'STOPPED'
+                    return
+        flag = True
+        for s in self.__module['scripts']:
+            flag &= (s['status']=='DONE')
+        if flag:
+            self.__queue.set_finished_node(self.__module['name'])
+            
 
     def __execute_script(self, script):
+#        if self.__queue.get_health_check_request():
+#            return False
         graph_node_id = "%s/%s" % (self.__module['name'], script['seq'])
         logging.info("%s: starting script execution" % (graph_node_id))
         args = None
         if "input" in script:
             args = self.__queue.block_receive(graph_node_id, script['input'])
+#            if args == None or args == "":
+#                self.__queue.set_health_check_request()
+#                return False
+        logging.info("Executing %s" % script['file'])
         o,e = self.__transfer_and_run(script['file-content'], args)
+        while e!="":
+            logging.info("Executing %s" % script['file'])
+            o,e = self.__transfer_and_run(script['file-content'], args)
+        logging.info("%s: stdout (%s) and stderr (%s)" % (graph_node_id, o, e))
         if "output" in script:
             self.__queue.send(graph_node_id, script['output'], o)
+        if e != "": # an error occured
+            return False
+        else:
+            return True
 
     def __setup_paramiko(self):
         # FIXME: I need to set paramiko timeout option to enable long script execution
@@ -104,8 +134,6 @@ class VMOrchestrator:
         stdin, stdout, stderr = self.__ssh.exec_command("%s %s" % (script_file, args_file))
         stdout_str = stdout.read()
         stderr_str = stderr.read()
-        logging.info("%s stdout: %s" % (script_file, stdout_str))
-        logging.info("%s stderr: %s" % (script_file, stderr_str))
         return stdout_str, stderr_str
 
     def __transfer_content(self, content):
