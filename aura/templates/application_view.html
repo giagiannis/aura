@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+
+{% block body %}
+{% for m in app.modules %}
+{{ m.name }}
+<br/>
+{% for s in m.scripts %}
+{{ s.file }} 
+<br/>
+{% endfor %}
+<br/>
+{% endfor %}
+
+{% endblock %}

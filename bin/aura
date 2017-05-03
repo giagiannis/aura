@@ -1,5 +1,6 @@
 #!/usr/bin/python
 from aura.deployment import ApplicationDeployment
+from aura.parsers import ApplicationDescriptionParser
 import logging
 from sys import argv
 import json
@@ -10,9 +11,9 @@ if __name__ == "__main__":
         exit(0)
     description_file = argv[1]
     aura_configuration = json.load(open(argv[2]))
-    print aura_configuration
 
     logging.basicConfig(level=logging.INFO)
-    a = ApplicationDeployment(description_file, aura_configuration)
+    parser = ApplicationDescriptionParser(description_file)
+    a = ApplicationDeployment(parser.get_description(), aura_configuration)
     a.allocate_resources()
     a.run_deployment()

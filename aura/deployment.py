@@ -8,11 +8,16 @@ from threading import Thread
 from time import sleep
 
 class ApplicationDeployment:
-    def __init__(self, description_file, aura_configuration):
-        desc = ApplicationDescriptionParser(description_file)
-        self.__desc = desc.get_description()
+    def __init__(self, description, aura_configuration):
+#        desc = ApplicationDescriptionParser(description_file)
+#        self.__desc = desc.get_description()
+        self.__desc = description
         self.__queue = Queue()
         self.__aura_conf = aura_configuration
+
+    def run(self):
+        self.allocate_resources()
+        self.run_deployment()
 
     def allocate_resources(self):
         cloud_config = self.__desc['cloud-conf']
@@ -59,7 +64,6 @@ class ApplicationDeployment:
 
     def status(self):
         return self.__desc
-
 
     def __parallel_start_orchestrators(self, orchestrators):
         logging.info("starting orchestrators in parallel")

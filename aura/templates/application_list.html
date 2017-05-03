@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+
+{% block body %}
+<table border=1>
+	<tr>
+<th>Name</th>
+<th>Description</th>
+<th>Number of modules</th>
+	</tr>
+{% for a in apps %}
+<tr>
+	<td>{{ a.name }}</td>
+	<td>{{ a.description }}</td>
+	<td>{{ a.modules |count}}</td>
+	<td><a href=/application/{{a.id}}>View</a> </td>
+	<td><a href=/application/{{a.id}}/deploy>Deploy</a> </td>
+</tr>
+{% endfor %}
+</table>
+
+
+
+{% endblock %}
