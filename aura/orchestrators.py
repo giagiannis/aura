@@ -62,43 +62,36 @@ class VMOrchestrator:
                             return
             sleep(1.0)
 
-    def execute_scripts(self, start):
+    def execute_scripts(self):
         for s in self.__module['scripts']:
-            if int(start) <= int(s['seq']):
-                s['status'] = 'EXECUTING'
-                status = self.__execute_script(s)
-                logging.info("Trying to execute %s, returned %s"% (s['file'], status))
-                if status and s['status'] == 'EXECUTING':
-                    s['status'] = 'DONE'
-                else:
-                    s['status'] = 'STOPPED'
-                    return
-        flag = True
-        for s in self.__module['scripts']:
-            flag &= (s['status']=='DONE')
+            self.__execute_script(s)
+        flag = reduce(lambda x,y : x&y, [s['status'] == 'DONE' for s in self.__module['scripts']])
         if flag:
             self.__queue.set_finished_node(self.__module['name'])
             
 
     def __execute_script(self, script):
-#        if self.__queue.get_health_check_request():
-#            return False
         graph_node_id = "%s/%s" % (self.__module['name'], script['seq'])
         logging.info("%s: starting script execution" % (graph_node_id))
         args = None
         if "input" in script:
+            script['status'] = 'WAITING_FOR_MESSAGE'
             args = self.__queue.block_receive(graph_node_id, script['input'])
-#            if args == None or args == "":
-#                self.__queue.set_health_check_request()
-#                return False
-        logging.info("Executing %s" % script['file'])
-        o,e = self.__transfer_and_run(script['file-content'], args)
-        while e!="":
+        while True:
             logging.info("Executing %s" % script['file'])
+            script['status'] = 'EXECUTING'
             o,e = self.__transfer_and_run(script['file-content'], args)
+            if e!="":
+                script['status'] = 'ERROR'
+                sleep(5.0)
+            else:
+                break
+        script['status']='FINISHED'
         logging.info("%s: stdout (%s) and stderr (%s)" % (graph_node_id, o, e))
         if "output" in script:
+            script['status']='SENDING_OUTPUT'
             self.__queue.send(graph_node_id, script['output'], o)
+        script['status']='DONE'
         if e != "": # an error occured
             return False
         else:

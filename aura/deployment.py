@@ -61,14 +61,11 @@ class ApplicationDeployment:
         return self.__desc
 
 
-    def __parallel_start_orchestrators(self, orchestrators, start_scripts= None):
+    def __parallel_start_orchestrators(self, orchestrators):
         logging.info("starting orchestrators in parallel")
         threads = []
         for o in orchestrators:
-            seq='1'
-            if start_scripts!=None and o.name in start_scripts:
-                seq = start_scripts[o.name]
-            threads.append(Thread(target = o.execute_scripts, args=(seq,)))
+            threads.append(Thread(target = o.execute_scripts))
         for t in threads:
             t.start()
         return threads
