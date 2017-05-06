@@ -1,20 +1,37 @@
 {% extends "layout.html" %}
 
 {% block body %}
-{% for m in deployment.modules %}
-{{ m.name }}
-<br/>
-{% for s in m.scripts %}
-{{ s.file }} 
-{{ s.status }} 
-<br/>
-{% endfor %}
-<br/>
-{% endfor %}
+
+
+<!-- <div class=result></div> -->
+
 <script>
-setTimeout(function(){
-	window.location.reload(1);
-}, 500);
+function callStuff() {
+$.get( window.location.href+"/status", function( data ) {
+//  $( ".result" ).html( data );
+  js = JSON.parse(data);
+  for (var m in js.modules ){
+	var obj = js.modules[m];
+	for (var s in js.modules[m].scripts) {
+		var id="#"+js.modules[m].name+js.modules[m].scripts[s].seq+"-status";
+		var scr_status = js.modules[m].scripts[s].status;
+		$( id ).html(scr_status);
+		$( id ).attr("class", "script-span")
+		$( id ).addClass(scr_status.toLowerCase());
+	}
+  }
+});
+}
+callStuff();
+setInterval(callStuff, 500);
 </script>
 
+<h2> Execution status </h2>
+<table class=tablelist>
+{% for m in deployment.modules %}
+{% for s in m.scripts %}
+<tr><th>{{ m.name }}/{{s.seq}}</th><td style='width:500px;'><span id={{m.name}}{{s.seq}}-status></span></td></tr>
+{% endfor %}
+{% endfor %}
+</table>
 {% endblock %}

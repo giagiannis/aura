@@ -1,0 +1,11 @@
+#!/usr/bin/python
+import logging
+from aura.server import app, AURAContext, context
+import json
+import sys
+
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
+    global context
+    context.allocate(json.load(open(sys.argv[1])))
+    app.run(debug=True)

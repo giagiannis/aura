@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 
 {% block body %}
-<table border=1>
+<table class=tablelist>
 	<tr>
 <th>Name</th>
 <th>Description</th>
@@ -12,8 +12,8 @@
 	<td>{{ a.name }}</td>
 	<td>{{ a.description }}</td>
 	<td>{{ a.modules |count}}</td>
-	<td><a href=/application/{{a.id}}>View</a> </td>
-	<td><a href=/application/{{a.id}}/deploy>Deploy</a> </td>
+	<td><a href=/application/{{a.id}}><img src="/static/info-icon.png" alt="View" height=42 width=42/></a> </td>
+	<td><a href=/application/{{a.id}}/deploy><img src="/static/deploy-process-icon.png" alt="Deploy" height=42 width=42/></a> </td>
 </tr>
 {% endfor %}
 </table>

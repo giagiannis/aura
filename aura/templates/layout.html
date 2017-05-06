@@ -1,9 +1,25 @@
 <!doctype html>
 <html>
-	<head>
-		<title>Flaskr</title>
-	</head>
+<head>
+<title>AURA</title>
+<link rel="stylesheet" href="/static/style.css">
+<meta charset="utf-8">
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+
+</head>
 <body>
-	{% block body %} {% endblock %}
+<nav id='header'>
+	<ul>
+		<li><a href={{ url_for('application_list')}}>Applications</a></li>
+		<li><a href={{ url_for('deployment_list')}}>Deployments</a></li>
+		<li><a href={{ url_for('about')}}>About</a></li>
+	</ul>
+</nav>
+<div id='body'>
+{% block body %} {% endblock %}
+</div>
 </body>
 </html>

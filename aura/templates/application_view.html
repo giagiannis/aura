@@ -1,14 +1,57 @@
 {% extends "layout.html" %}
-
 {% block body %}
+
+<h1>{{ app.name }}</h1>
+<span>  {{ app.description }} </span>
+
+<!-- Modules part -->
+<h2> Modules </h2>
+
 {% for m in app.modules %}
-{{ m.name }}
-<br/>
+<h3>{{ m.name }}</h3>
+
+<div id={{m.name}}>
 {% for s in m.scripts %}
-{{ s.file }} 
-<br/>
+<h3>{{ m.name }}/{{ s.seq }}</h3>
+<div>
+<p>
+<table class=tablelist style='width:300px'>
+{% if s.input %}
+<tr><th>Input</th> <td>{{ s.input }}</td></tr>
+{% endif %}
+{% if s.output %}
+<tr><th>Output</th> <td>{{ s.output }}</td></tr>
+{% endif %}
+</table>
+<h4>Commands</h4>
+<textarea rows=10 cols=80 readonly=true>
+{{ s["file-content"]}}
+</textarea>
+</p>
+</div>
 {% endfor %}
-<br/>
+
+
+
+</div>
 {% endfor %}
+{% for m in app.modules %}
+<script>
+$( function() {
+$( "#{{m.name}}" ).accordion(
+	{collapsible: true, active:false})
+;} );
+</script>
+{% endfor %}
+
+<!-- Cloud configuration-->
+<h2> Cloud Configuration </h2>
+<table class=tablelist>
+<tr><th>User</th><td>{{ app["cloud-conf"].username }}</td></tr>
+<tr><th>Project ID</th><td>{{ app["cloud-conf"].project_id }}</td></tr>
+<tr><th>Authentication URL</th><td>{{ app["cloud-conf"].auth_url }}</td></tr>
+<tr><th>Network Name</th><td>{{ app["cloud-conf"].network_name }}</td></tr>
+<tr><th>Keystone Version</th><td>{{ app["cloud-conf"].version }}</td></tr>
+</table>
 
 {% endblock %}

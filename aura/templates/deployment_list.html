@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+
+{% block body %}
+<table class=tablelist> 
+	<tr>
+<th>Application</th>
+<th>Status</th>
+<th>Number of VMs</th>
+	</tr>
+{% for d in deps %}
+<tr>
+	<td>{{ d.name }}</td>
+	<td>{{ d.status }}</td>
+	<td>{{ d.modules |count}}</td>
+	<td><a href={{ url_for('deployment_show', dep_id=d.id)}}><img src="/static/info-icon.png" alt="View" height=42 width=42/></a> </td>
+</tr>
+{% endfor %}
+</table>
+
+
+
+{% endblock %}

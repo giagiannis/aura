@@ -20,6 +20,7 @@ class ApplicationDeployment:
         self.run_deployment()
 
     def allocate_resources(self):
+        self.__desc['status']='BOOTING'
         cloud_config = self.__desc['cloud-conf']
         cloud = CloudOrchestrator(cloud_config)
         def create_vm_and_set_ip(m):
@@ -39,6 +40,7 @@ class ApplicationDeployment:
         logging.info("Allocation complete: %s" % self.__desc)
     
     def run_deployment(self):
+        self.__desc['status']='RUNNING'
         orchestrators = []
         for m in self.__desc['modules']:
             o = VMOrchestrator(self.__queue, m, self.__aura_conf['prv_key'])
@@ -61,6 +63,7 @@ class ApplicationDeployment:
 #            if self.__queue.get_health_check_request():
 #                self.__health_check_routine(orchestrators)
             sleep(1.0)
+        self.__desc['status']='DONE'
 
     def status(self):
         return self.__desc

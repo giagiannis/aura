@@ -1,0 +1,92 @@
+html {
+	font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+}
+
+#body {
+	width: 800px;
+	margin: auto;
+}
+
+
+ul {
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+	background-color: #333;
+}
+
+li {
+	float: left;
+}
+
+li a {
+	display: block;
+	color: white;
+	text-align: center;
+	padding: 15px 16px;
+	text-decoration: none;
+}
+
+li a:hover {
+	background-color: #111;
+}
+
+
+.tablelist {
+	border-collapse: collapse;
+	width: 100%;
+}
+
+.tablelist td, .tablelist th {
+	border: 1px solid #ddd;
+	padding: 8px;
+}
+
+.tablelist tr:nth-child(even){background-color: #f2f2f2;}
+
+.tablelist tr:hover {background-color: #ddd;}
+
+.tablelist th {
+	padding-top: 12px;
+	padding-bottom: 12px;
+	text-align: left;
+	background-color: #4CAF50;
+	color: white;
+}
+
+.ui-accordion-header.ui-state-active  {
+	background-color: #4CAF50;
+}
+
+textarea {
+	color: white;
+	background-color: black;
+}
+
+h1, h2{
+	color: #4CAF50;
+}
+
+.script-span {
+	font-weight:bold;
+	color: #333333;
+}
+
+.script-span.done {
+	color: #4CAF50;
+}
+
+.script-span.executing {
+	color: #3333FF;
+  	animation: blinker 0.8s linear infinite;
+}
+
+.script-span.error {
+	color: #FF3333;
+  	animation: blinker 0.4s linear infinite;
+}
+
+@keyframes blinker {  
+  50% { opacity: 0; }
+}
