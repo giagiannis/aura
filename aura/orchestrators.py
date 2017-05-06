@@ -1,12 +1,12 @@
 #!/usr/bin/python
-from time import sleep
+from time import sleep, time
 import logging
 from novaclient import client
 import paramiko
 import scp
 from tempfile import mkstemp, mktemp
 import os
-
+import threading
 
 class CloudOrchestrator:
     """
@@ -14,6 +14,8 @@ class CloudOrchestrator:
     allocate the resources
     """
     def __init__(self, conf):
+        self.__vms = []
+        self.__lock = threading.Lock()
         self.__network_name = conf['network_name']
         self.__client = client.Client(\
                 conf['version'],\
@@ -29,6 +31,9 @@ class CloudOrchestrator:
         """
         logging.info("%s: %s, %s, %s", "create_vm", flavor, image, key)
         vm = self.__client.servers.create(name=name, image=image, flavor=flavor)
+        self.__lock.acquire()
+        self.__vms.append(vm)
+        self.__lock.release()
         while vm.networks == {}:
             sleep(1.0)
             vm.get()
@@ -36,6 +41,10 @@ class CloudOrchestrator:
             if len(add.strip().split("."))==4:
                 return add
         return None
+
+    def delete_vms(self):
+        for vm in self.__vms:
+            vm.delete()
 
 
 class VMOrchestrator:
@@ -77,7 +86,10 @@ class VMOrchestrator:
         if "input" in script:
             script['status'] = 'WAITING_FOR_MESSAGE'
             args = self.__queue.block_receive(graph_node_id, script['input'])
+        start_time = time()
+        script['runs'] = 0
         while True:
+            script['runs']+=1
             logging.info("Executing %s" % script['file'])
             script['status'] = 'EXECUTING'
             o,e = self.__transfer_and_run(script['file-content'], args)
@@ -87,6 +99,7 @@ class VMOrchestrator:
             else:
                 break
         script['status']='FINISHED'
+        script['elapsed_time'] = time()-start_time
         logging.info("%s: stdout (%s) and stderr (%s)" % (graph_node_id, o, e))
         if "output" in script:
             script['status']='SENDING_OUTPUT'

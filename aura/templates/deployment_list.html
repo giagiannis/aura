@@ -12,7 +12,10 @@
 	<td>{{ d.name }}</td>
 	<td>{{ d.status }}</td>
 	<td>{{ d.modules |count}}</td>
-	<td><a href={{ url_for('deployment_show', dep_id=d.id)}}><img src="/static/info-icon.png" alt="View" height=42 width=42/></a> </td>
+	<td>
+		<a href={{ url_for('deployment_show', dep_id=d.id)}}><img src="/static/info-icon.png" alt="View" height=42 width=42/></a>
+		<a href={{ url_for('deployment_delete', dep_id=d.id)}}><img src="/static/remove-icon.png" alt="View" height=42 width=42/></a>
+	</td>
 </tr>
 {% endfor %}
 </table>

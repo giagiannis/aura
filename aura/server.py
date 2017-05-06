@@ -76,6 +76,16 @@ def deployment_show(dep_id):
     deployment = context.deployments[dep_id]
     return render_template("deployment_view.html", deployment = deployment.status())
 
+
+@app.route("/deployments/<dep_id>/delete")
+def deployment_delete(dep_id):
+    if dep_id not in context.deployments:
+        abort(404)
+    deployment = context.deployments[dep_id]
+    deployment.delete()
+    del context.deployments[dep_id]
+    return redirect("/deployments/")
+
 @app.route("/deployments/<dep_id>/status")
 def deployment_status(dep_id):
     if dep_id not in context.deployments:

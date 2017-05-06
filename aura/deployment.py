@@ -1,6 +1,6 @@
 #!/usr/bin/python
 import logging
-from time import sleep
+from time import sleep, time
 from parsers import ApplicationDescriptionParser
 from orchestrators import CloudOrchestrator, VMOrchestrator
 from queue import Queue
@@ -20,11 +20,12 @@ class ApplicationDeployment:
         self.run_deployment()
 
     def allocate_resources(self):
-        self.__desc['status']='BOOTING'
+        self.__desc['status']='ALLOCATING_RESOURCES'
+        start = time()
         cloud_config = self.__desc['cloud-conf']
-        cloud = CloudOrchestrator(cloud_config)
+        self.__cloud = CloudOrchestrator(cloud_config)
         def create_vm_and_set_ip(m):
-            address = cloud.create_vm(m['name'],m['flavor_id'], m['image_id'], None)
+            address = self.__cloud.create_vm(m['name'],m['flavor_id'], m['image_id'], None)
             m['address'] = address
 
         threads = []
@@ -37,10 +38,12 @@ class ApplicationDeployment:
             t.start()
         for t in threads:
             t.join()
+        self.__desc['allocating_resources_time'] = time()-start
         logging.info("Allocation complete: %s" % self.__desc)
     
     def run_deployment(self):
-        self.__desc['status']='RUNNING'
+        self.__desc['status']='BOOTING'
+        start = time()
         orchestrators = []
         for m in self.__desc['modules']:
             o = VMOrchestrator(self.__queue, m, self.__aura_conf['prv_key'])
@@ -48,6 +51,9 @@ class ApplicationDeployment:
 
         for o in orchestrators:
             o.wait_until_booted()
+        self.__desc['booting_time'] = time()-start
+        self.__desc['status']='RUNNING'
+        start = time()
 
         # parallel orchestrator execution
         self.__parallel_start_orchestrators(orchestrators)
@@ -63,10 +69,14 @@ class ApplicationDeployment:
 #            if self.__queue.get_health_check_request():
 #                self.__health_check_routine(orchestrators)
             sleep(1.0)
+        self.__desc['running_time'] = time()-start
         self.__desc['status']='DONE'
 
     def status(self):
         return self.__desc
+
+    def delete(self):
+        self.__cloud.delete_vms()
 
     def __parallel_start_orchestrators(self, orchestrators):
         logging.info("starting orchestrators in parallel")
