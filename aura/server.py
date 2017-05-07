@@ -2,8 +2,7 @@
 
 from flask import Flask, render_template, redirect, abort
 import os
-from aura.parsers import ApplicationDescriptionParser
-from aura.deployment import ApplicationDeployment
+from aura.core import ApplicationDescriptionParser, ApplicationDeployment
 import json
 from sys import argv
 import uuid

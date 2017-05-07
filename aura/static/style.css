@@ -5,7 +5,7 @@ html {
 #body {
 	width: 800px;
 	margin: auto;
-	box-shadow: 20px 20px 20px #888888;
+	box-shadow: 20px 20px 20px #aaaaaa;
 	background-color: #ffffff;
 }
 
@@ -88,17 +88,35 @@ h1, h2{
 
 .script-span.executing {
 	color: #3333FF;
-  	animation: blinker 1.0s linear infinite;
+	animation: blinker 1.0s linear infinite;
 }
 
 .script-span.error {
 	color: #FF3333;
-  	animation: blinker 0.5s linear infinite;
+	animation: blinker 0.5s linear infinite;
 }
 
 .general-status-active {
-  	animation: blinker 1.0s linear infinite;
+	animation: blinker 1.0s linear infinite;
 }
 @keyframes blinker {  
-  50% { opacity: 0; }
+	50% { opacity: 0; }
 }
+
+
+.link
+{
+	border: solid 2px #aaa;
+	border-radius: 3x;
+	-moz-border-radius: 3px;
+	-webkit-border-radius: 3px;
+	background-color: #4CAF50;
+	color: #000;
+	text-decoration: none;
+	font-weight: bold;
+	margin: 10px 3px 10px 3px;
+	padding: 3px;
+	display: inline-block;
+}
+.link:hover { background-color: #acea11; }
+
