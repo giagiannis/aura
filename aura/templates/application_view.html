@@ -9,7 +9,14 @@
 
 {% for m in app.modules %}
 <h3>{{ m.name }}</h3>
+<h4>Deployment Details</h4>
+<table class=tablelist>
+	<tr><th>Image</th><td>{{ m.image_id }}</td></tr>
+	<tr><th>Flavor</th><td>{{ m.flavor_id }}</td></tr>
+	<tr><th>Multiplicity</th><td>{{m.multiplicity}}</td></tr>
+</table>
 
+<h4>Installation Scripts</h4>
 <div id={{m.name}}>
 {% for s in m.scripts %}
 <h3>{{ m.name }}/{{ s.seq }}</h3>

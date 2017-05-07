@@ -51,7 +51,10 @@ def application_show(app_id):
 def application_deploy(app_id):
     if app_id not in context.applications:
         abort(404)
-    d = ApplicationDeployment(deepcopy(context.applications[app_id]), context.config)
+    parser = ApplicationDescriptionParser(context.applications[app_id]['path'])
+    desc = parser.expand_description()
+    logging.info(desc)
+    d = ApplicationDeployment(desc, context.config)
     deployment_id = str(uuid.uuid4())
     context.deployments[deployment_id] = d
     t = Thread(target = d.run)

@@ -1,4 +1,5 @@
 #!/usr/bin/python
+from copy import deepcopy
 from time import sleep, time, ctime
 from novaclient import client
 from tempfile import mkstemp, mktemp
@@ -171,7 +172,9 @@ class VMOrchestrator:
         args = None
         if "input" in script:
             script['status'] = 'WAITING_FOR_MESSAGE'
-            args = self.__queue.block_receive(graph_node_id, script['input'])
+            args = ""
+            for i in script['input']:
+                args += self.__queue.block_receive(graph_node_id, i)
         start_time = time()
         script['runs'] = 0
         while True:
@@ -190,7 +193,8 @@ class VMOrchestrator:
         logging.info("%s: stdout (%s) and stderr (%s)" % (graph_node_id, o, e))
         if "output" in script:
             script['status']='SENDING_OUTPUT'
-            self.__queue.send(graph_node_id, script['output'], o)
+            for x in script['output']:
+                self.__queue.send(graph_node_id, x, o)
         script['status']='DONE'
         if e != "": # an error occured
             return False
@@ -271,6 +275,60 @@ class ApplicationDescriptionParser:
 
     def get_description(self):
         return self.__content
+
+    def expand_description(self):
+        new_one = dict()
+        new_one['name'] = deepcopy(self.__content['name'])
+        new_one['description'] = deepcopy(self.__content['description'])
+        new_one['cloud-conf'] = deepcopy(self.__content['cloud-conf'])
+
+        new_one['modules'] = []
+        multiplicities= dict()
+        for m in self.__content['modules']:
+            # creating a dict
+            multiplicities[m['name']] = 1
+            if 'multiplicity' in m:
+                multiplicities[m['name']] = m['multiplicity']
+
+            # replicating for each VM
+            if 'multiplicity' not in m or m['multiplicity'] == 1:
+                new_one['modules'].append(deepcopy(m))
+            else:   # do your shit
+                for i in range(1, m['multiplicity']+1):
+                    new_m = deepcopy(m)
+                    new_m['name'] = "%s%d" %(new_m['name'], i)
+                    new_one['modules'].append(new_m)
+
+        for vm in new_one['modules']:
+            for s in vm['scripts']:
+                if 'input' in s:
+                    new_input = []
+                    for x in s['input']:
+                        multi, seq = x.split("/")[0], x.split("/")[1]
+                        if multiplicities[multi]>1:
+                            for i in range(1, multiplicities[multi]+1):
+                                new_input.append("%s%d/%s"  % (multi, i, seq))
+                    if len(new_input)>0:
+                        del(s['input'])
+                        s['input'] = new_input
+
+                if 'output' in s:
+                    new_output = []
+                    for x in s['output']:
+                        multi, seq = x.split("/")[0], x.split("/")[1]
+                        if multiplicities[multi]>1:
+                            for i in range(1, multiplicities[multi]+1):
+                                new_output.append("%s%d/%s"  % (multi, i, seq))
+                    if len(new_output)>0:
+                        del(s['output'])
+                        s['output'] = new_output
+        return new_one
+
+if __name__ == "__main__":
+    import sys
+    a = ApplicationDescriptionParser(sys.argv[1])
+    print json.dumps(a.get_description(), indent=2)
+    print json.dumps(a.expand_description(), indent=2)
 
 class Queue:
     """

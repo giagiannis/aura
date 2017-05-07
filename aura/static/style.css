@@ -55,12 +55,12 @@ li a:hover {
 	padding-top: 12px;
 	padding-bottom: 12px;
 	text-align: left;
-	background-color: #4CAF50;
+	background-color: #006bd6;
 	color: white;
 }
 
 .ui-accordion-header.ui-state-active  {
-	background-color: #4CAF50;
+	background-color: #006bd6;
 }
 
 textarea {
@@ -70,7 +70,7 @@ textarea {
 }
 
 h1, h2{
-	color: #4CAF50;
+	color: #006bd6;
 }
 
 .script-span {
@@ -110,7 +110,7 @@ h1, h2{
 	border-radius: 3x;
 	-moz-border-radius: 3px;
 	-webkit-border-radius: 3px;
-	background-color: #4CAF50;
+	background-color: #006bd6;
 	color: #000;
 	text-decoration: none;
 	font-weight: bold;
@@ -118,7 +118,7 @@ h1, h2{
 	padding: 3px;
 	display: inline-block;
 }
-.link:hover { background-color: #acea11; }
+.link:hover { background-color: #2491ff; }
 
 .logs {
 	font-size: small;

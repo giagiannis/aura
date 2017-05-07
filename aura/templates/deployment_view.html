@@ -120,8 +120,9 @@ function createVIS() {
 				nodelist.push({id: id, color: "gray"});
 				edgelist.push({from: id, to: id_plus_one, label:id, arrows:"to", color: "gray"});
 				if (script.output) {
-					console.log(id_plus_one)
-						edgelist.push({from: id_plus_one, arrows: "to", to: script.output, color: "gray", dashes: "true"});
+					for (var o in script.output) {
+						edgelist.push({from: id_plus_one, arrows: "to", to: script.output[o], color: "gray", dashes: "true"});
+					}
 				}
 			}
 			var id = module.name+"/end";
