@@ -7,5 +7,6 @@ import sys
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     global context
-    context.allocate(json.load(open(sys.argv[1])))
-    app.run(debug=True)
+    conf = json.load(open(sys.argv[1]))
+    context.allocate(conf)
+    app.run(debug=True, host = conf['host'], port = conf['port'])

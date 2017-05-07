@@ -1,18 +1,15 @@
 #!/usr/bin/python
-import logging
 from time import sleep, time, ctime
-from parsers import ApplicationDescriptionParser
-from orchestrators import CloudOrchestrator, VMOrchestrator
-from queue import Queue
 from novaclient import client
+from tempfile import mkstemp, mktemp
+from shutil import rmtree
 import paramiko
 import scp
-from tempfile import mkstemp, mktemp
 import os
 import threading
 import tarfile
 import json
-from shutil import rmtree
+import logging
 
 
 
