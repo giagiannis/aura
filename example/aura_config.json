@@ -1,4 +1,8 @@
 {
 	"prv_key" : "private/image_key",
-	"applications" : ["/home/giannis/Projects/aura/example/demo"]
+	"applications" : ["/home/giannis/Projects/aura/example/demo"],
+	"host": "0.0.0.0",
+	"port": 8080,
+	"static": "~/Project/aura/aura/static",
+	"templates": "~/Project/aura/aura/templates"
 }

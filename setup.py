@@ -11,7 +11,7 @@ setup(
         license='Apache License 2.0',
         url='https://github.com/giagiannis/aura',
         packages=['aura', 'tests'],
-        scripts=['bin/aura'],
+        scripts=['bin/aura', 'bin/aura-server'],
         setup_requires=['pytest-runner'],
         tests_require=['pytest']
         )
