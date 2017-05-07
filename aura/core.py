@@ -179,6 +179,7 @@ class VMOrchestrator:
             logging.info("Executing %s" % script['file'])
             script['status'] = 'EXECUTING'
             o,e = self.__transfer_and_run(script['file-content'], args)
+            script['stdout'], script['stderr'] = o, e
             if e!="":
                 script['status'] = 'ERROR'
                 sleep(5.0)

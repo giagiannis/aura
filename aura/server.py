@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from flask import Flask, render_template, redirect, abort
+from flask import Flask, render_template, redirect, abort, Response
 import os
 from aura.core import ApplicationDescriptionParser, ApplicationDeployment
 import json
@@ -72,8 +72,9 @@ def deployment_list():
 def deployment_show(dep_id):
     if dep_id not in context.deployments:
         abort(404)
-    deployment = context.deployments[dep_id]
-    return render_template("deployment_view.html", deployment = deployment.status())
+    deployment = context.deployments[dep_id].status()
+    deployment['id'] = dep_id
+    return render_template("deployment_view.html", deployment = deployment)
 
 
 @app.route("/deployments/<dep_id>/delete")
@@ -92,6 +93,23 @@ def deployment_status(dep_id):
     deployment = context.deployments[dep_id]
     return json.dumps(deployment.status())
 
+@app.route("/deployments/<dep_id>/<module_name>/<script_seq>/<log_type>/")
+def deployment_script_logs(dep_id, module_name, script_seq, log_type):
+    if dep_id not in context.deployments:
+        abort(404)
+    print "(%s, %s, %s, %s)" % (dep_id, module_name, script_seq, log_type)
+    deployment = context.deployments[dep_id].status()
+    for m in deployment['modules']:
+        print m
+        for s in m['scripts']:
+            print s
+            if m['name'] == module_name and script_seq == str(s['seq']):
+                if log_type == 'stdout' or log_type == 'stderr':
+                    if log_type in s:
+                        return Response(s[log_type], mimetype='text/plain', headers={"Content-Disposition": "attachment;filename=%s_%s_%s_%s.log" % (dep_id, module_name, script_seq, log_type)})
+                    else:
+                        return "Nothing yet"
+    return "Not found"
 
 @app.route("/about/")
 def about():

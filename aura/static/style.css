@@ -120,3 +120,6 @@ h1, h2{
 }
 .link:hover { background-color: #acea11; }
 
+.logs {
+	font-size: small;
+}
