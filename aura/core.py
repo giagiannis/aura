@@ -324,12 +324,6 @@ class ApplicationDescriptionParser:
                         s['output'] = new_output
         return new_one
 
-if __name__ == "__main__":
-    import sys
-    a = ApplicationDescriptionParser(sys.argv[1])
-    print json.dumps(a.get_description(), indent=2)
-    print json.dumps(a.expand_description(), indent=2)
-
 class Queue:
     """
     Queue class implements a simple queing mechanism used by different VMOrchestrators
