@@ -31,7 +31,7 @@
 {% endif %}
 </table>
 <h4>Commands</h4>
-<textarea rows=10 cols=80 readonly=true>
+<textarea class='console' readonly=true>
 {{ s["file-content"]}}
 </textarea>
 </p>
@@ -46,7 +46,7 @@
 <script>
 $( function() {
 $( "#{{m.name}}" ).accordion(
-	{collapsible: true, active:false})
+	{collapsible: true, active:false, heightStyle: "content"})
 ;} );
 </script>
 {% endfor %}
