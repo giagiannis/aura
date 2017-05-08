@@ -1,0 +1,45 @@
+{
+	"name": "Wordpress",
+	"description": "Simple Wordpress installation (LAMP stack in 2 VMs)", 
+	"modules": [{
+		"name": "db-server",
+		"image_id": "8ae647b4-8357-4caa-9ed6-d9f3ef9d473e",
+		"flavor_id": "11",
+		"scripts": [{
+			"seq": 1,
+			"file": "db_server/install.sh"
+		},{
+			"seq": 2,
+			"file": "db_server/configure.sh"
+		},{
+			"seq": 3,
+			"file": "db_server/create_user.sh",
+			"input" : ["web-server/1"],
+			"output": ["web-server/3"]
+		}]
+	},{
+		"name": "web-server",
+		"image_id": "8ae647b4-8357-4caa-9ed6-d9f3ef9d473e",
+		"flavor_id": "11",
+		"scripts": [{
+			"seq": 1,
+			"file": "web_server/send_ip.sh",
+			"output":["db-server/3"]
+		},{
+			"seq": 2,
+			"file": "web_server/install.sh"
+		},{
+			"seq": 3,
+			"file": "web_server/configure.sh",
+			"input": ["db-server/3"]
+		}]
+	}],
+	"cloud-conf": {
+		"version":"",
+		"username":"",
+		"password":"",
+		"project_id":"",
+		"auth_url":"",
+		"network_name":""
+	}
+}
