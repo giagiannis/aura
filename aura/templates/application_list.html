@@ -1,6 +1,7 @@
 {% extends "layout.html" %}
 
 {% block body %}
+
 <table class=tablelist>
 	<tr>
 <th>Name</th>
@@ -14,12 +15,12 @@
 	<td>{{ a.modules |count}}</td>
 	<td align='center'>
 		<a href=/application/{{a.id}}><img src="/static/info-icon.png" alt="View" height=42 width=42/></a>
-		<a href=/application/{{a.id}}/deploy><img src="/static/deploy-process-icon.png" alt="Deploy" height=42 width=42/></a>
+		<!--		<a href=/application/{{a.id}}/deploy><img src="/static/deploy-process-icon.png" alt="Deploy" height=42 width=42/></a>	-->
+		<a href='#' onclick='create_alert("{{a.id}}");'><img src="/static/deploy-process-icon.png" alt="Deploy" height=42 width=42/></a>
 	</td>
 </tr>
 {% endfor %}
 </table>
 
-
-
+<script type='text/javascript' src='/static/script.js'></script>
 {% endblock %}

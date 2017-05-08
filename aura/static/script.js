@@ -1,5 +1,3 @@
-var nodes, edges;
-var network;
 function createVIS() {
 		a = $.get( window.location.href+"/status", function( data ) {
 				js = JSON.parse(data);
@@ -110,8 +108,38 @@ function updatePage() {
 
 		});
 }
+function create_alert(app_id) {
+		$.get("/application/"+app_id+"/json", function (data) {
+				var finalDiv = "<div><table>";
+				js = JSON.parse(data);
+				var ids = [];
+				for (i in js.modules) {
+						var current_id = js.modules[i].name;
+						ids.push(current_id);
+						var multi = 1;
+						if (js.modules[i].multiplicity>1) {
+								multi = js.modules[i].multiplicity
+						}
+						finalDiv = finalDiv + ("<tr><td>"+js.modules[i].name +"</td><td><input id='"+current_id+"' type='text' value="+multi+"></input></td></tr>");
+				}
+				finalDiv = finalDiv+"<tr><td></td><td><button style='float:right;' onclick='my_dialog_handler(\""+ids+"\", \""+app_id+"\")' class='ui-button ui-widget ui-corner-all'>Deploy</button></td></tr>";
+				finalDiv = finalDiv+ "</table>";
+				finalDiv = finalDiv+"</div>";
+			var dialog = $( finalDiv ).dialog();
+			dialog.dialog("option", "title", "Number of VMs");
+		});
+}
+
+function my_dialog_handler(ids, app_id) {
+		var url = "/application/"+app_id+"/deploy?";
+		var ids_split = ids.split(",");
+		for (i in ids_split ) {
+				url = url + ids_split[i] +"="+$( "#"+ids_split[i] ).val();
+				if (i < ids_split.length -1 ){
+						url = url+"&";
+				}
+		}
+		window.location.href = url;
+}
 
 
-createVIS();
-updatePage();
-setInterval(updatePage, 500);

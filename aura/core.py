@@ -273,6 +273,12 @@ class ApplicationDescriptionParser:
         if is_tar:
             rmtree(workdir)
 
+    def set_multiplicities(self, multiplicities):
+        for m in self.__content['modules']:
+            if m['name'] in multiplicities:
+                m['multiplicity'] = multiplicities[m['name']]
+
+
     def get_description(self):
         return self.__content
 

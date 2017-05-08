@@ -41,4 +41,11 @@
 </table>
 
 <script type='text/javascript' src='/static/script.js'></script>
+<script type='text/javascript'>
+var nodes, edges;
+var network;
+createVIS();
+updatePage();
+setInterval(updatePage, 500);
+</script>
 {% endblock %}

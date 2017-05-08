@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from flask import Flask, render_template, redirect, abort, Response
+from flask import Flask, render_template, redirect, abort, Response, request
 import os
 from aura.core import ApplicationDescriptionParser, ApplicationDeployment
 import json
@@ -47,13 +47,22 @@ def application_show(app_id):
         abort(404)
     return render_template("application_view.html", app = context.applications[app_id])
 
+@app.route("/application/<app_id>/json")
+def application_json(app_id):
+    if app_id not in context.applications:
+        abort(404)
+    return json.dumps(context.applications[app_id])
+
 @app.route("/application/<app_id>/deploy")
 def application_deploy(app_id):
     if app_id not in context.applications:
         abort(404)
+    multiplicities = dict()
+    for module_name in request.args:
+        multiplicities[module_name] = int(request.args.get(module_name))
     parser = ApplicationDescriptionParser(context.applications[app_id]['path'])
+    parser.set_multiplicities(multiplicities)
     desc = parser.expand_description()
-    logging.info(desc)
     d = ApplicationDeployment(desc, context.config)
     deployment_id = str(uuid.uuid4())
     context.deployments[deployment_id] = d
