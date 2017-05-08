@@ -1,14 +1,14 @@
+#!/usr/bib/python
 import unittest
-from aura.queue import Queue
+from aura.core import Queue
 
 class TestQueue(unittest.TestCase):
-    def test_send(self):
+    def test_send_receive(self):
         q = Queue()
         orig, dst, msg = "12", "34", "hello world"
         q.send(orig, dst, msg)
-        a = q.receive(dst)[0]
-        self.assertEqual(a[0], orig)
-        self.assertEqual(a[1], msg)
+        msg2 = q.block_receive(dst, orig)
+        self.assertEqual(msg2, msg)
 
 
 
