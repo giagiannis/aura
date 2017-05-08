@@ -1,3 +1,3 @@
 #!/bin/bash
 
-echo "Hello World"
+echo "aura-two/script1.sh"
