@@ -78,32 +78,70 @@ function updatePage() {
 		// update the VIS network
 		keys = {};
 		for (m in js.modules) {
+			var last_status = "";
 			for ( s in js.modules[m].scripts) {
 				keys[js.modules[m].name+"/"+js.modules[m].scripts[s].seq] = js.modules[m].scripts[s].status
+				last_status = js.modules[m].scripts[s].status
 			}
+			keys[js.modules[m].name+"/end"] = last_status
 		}
+
 		for (var x in edges.get()) {
 			current = edges.get()[x];
 			color = "#333333";
 			if (keys[current.from] == "DONE" ) {
 				color="#4CAF50";
+			
+				current.color =  color;
+				edges.update(current);
+
+				a = nodes.get(current.to)
+				a.color = {background: color};
+				nodes.update(a);
+
+				b = nodes.get(current.from)
+				b.color = {background: color};
+				nodes.update(b);
+
 			}else if (keys[current.from] == "EXECUTING") {
 				color="#3333FF";
+				current.color =  color;
+				edges.update(current);
+
+				//a = nodes.get(current.to)
+				//a.color = {background: color};
+				//nodes.update(a);
+
+				b = nodes.get(current.from)
+				b.color = {background: color};
+				nodes.update(b);
+
 			}else if (keys[current.from] == "ERROR") {
 				color="#FF3333";
+				current.color =  color;
+				edges.update(current);
+
+				//a = nodes.get(current.to)
+				//a.color = {background: color};
+				//nodes.update(a);
+
+				b = nodes.get(current.from)
+				b.color = {background: color};
+				nodes.update(b);
 			}else if (keys[current.from] == "WAITING_FOR_MESSAGE") {
 				color="#cccc00";
+				//current.color =  color;
+				//edges.update(current);
+
+				//a = nodes.get(current.to)
+				//a.color = {background: color};
+				//nodes.update(a);
+
+				b = nodes.get(current.from)
+				b.color = {background: color};
+				nodes.update(b);
+
 			}
-			current.color =  color;
-			edges.update(current);
-
-			a = nodes.get(current.to)
-			a.color = {background: color};
-			nodes.update(a);
-
-			b = nodes.get(current.from)
-			b.color = {background: color};
-			nodes.update(b);
 		}
 
 	});
