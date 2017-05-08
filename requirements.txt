@@ -1,4 +1,4 @@
-python-novaclient
+python-novaclient==8.0
 paramiko
 scp
 Flask
