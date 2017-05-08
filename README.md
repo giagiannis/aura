@@ -19,10 +19,7 @@ You can then install the python egg with:
 python setup.py install
 ```
 
-You can also use without installing, but you have to extend the PYTHONPATH variable: 
-```bash
-export PYTHONPATH=.:$PYTHONPATH
-```
+This command only installs the CLI Client, as the Web Server is designed to be launched from inside the project root.
 
 Usage
 -----
