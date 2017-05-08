@@ -7,10 +7,18 @@ AURA is an Openstack application deployment tool with error-recovery enhancement
 
 Installation
 ------------
-Fork this repository and run 
+Fork this repository and install the requirements with pip:
+
+```bash
+pip install -r requirements.txt
+```
+
+You can then install the python egg with:
+
 ```bash
 python setup.py install
 ```
+
 You can also use without installing, but you have to extend the PYTHONPATH variable: 
 ```bash
 export PYTHONPATH=.:$PYTHONPATH
