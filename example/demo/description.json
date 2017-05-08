@@ -3,8 +3,7 @@
 	"description": "Simple Application with two modules",
 	"modules": [{
 		"name": "aura-one",
-		"image_id": "45eed1e2-4ac9-4e1f-822a-fc5f6180605c",
-		"multiplicity":1,
+		"image_id": "8ae647b4-8357-4caa-9ed6-d9f3ef9d473e",
 		"flavor_id": "11",
 		"scripts": [{
 			"seq": 1,
@@ -23,9 +22,9 @@
 	},
 	{
 		"name": "aura-two",
-		"image_id": "45eed1e2-4ac9-4e1f-822a-fc5f6180605c",
+		"image_id": "8ae647b4-8357-4caa-9ed6-d9f3ef9d473e",
 		"flavor_id": "11",
-		"multiplicity":1,
+		"multiplicity":2,
 		"scripts": [{
 			"seq": 1,
 			"file": "two/script1.sh"
