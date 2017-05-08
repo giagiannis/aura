@@ -3,3 +3,4 @@
 .cache/
 .eggs/
 aura.egg-info/
+private/
