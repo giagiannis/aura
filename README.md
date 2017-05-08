@@ -1,4 +1,4 @@
-AURA
+AURA ![travis-status](https://travis-ci.org/giagiannis/aura.svg?branch=master)
 ====
 
 About
