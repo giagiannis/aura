@@ -7,7 +7,6 @@ if [ "$(printf "%0.2f\n" $(echo print "$RANDOM/32767." | perl))" \< "$CHANCE" ];
 		exit 0
 fi
 
-NET_INTERFACE='eth0'
-IP_ADDRESS=$(ip addr show $NET_INTERFACE | grep "inet\s" |  cat | awk '{print $2}' | cut -d'/' -f1)
+IP_ADDRESS=$(ip addr show| grep "inet\s" |  grep -v "127.0" | awk '{print $2}' | cut -d'/' -f1)
 
 echo "$(hostname),$IP_ADDRESS"
