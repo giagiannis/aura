@@ -2,14 +2,14 @@
 
 import sys
 import logging
-import json
+import yaml
 sys.path.append(".")
 
 from aura.server import app, AURAContext, context
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
-    global context
-    conf = json.load(open(sys.argv[1]))
+    conf = yaml.load(open(sys.argv[1]))
     context.allocate(conf)
-    app.run(debug=True, host = conf['host'], port = conf['port'])
+    logging.basicConfig(filename=conf['logging']['file'],level=logging.INFO)
+    logging.captureWarnings(True)
+    app.run(debug=True, host = conf['server']['host'], port = conf['server']['port'])
