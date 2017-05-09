@@ -9,7 +9,7 @@ function createVIS() {
 				var id = module.name+"/"+script.seq;
 				var id_plus_one = module.name+"/"+(parseInt(script.seq)+1).toString();
 				if (s == module.scripts.length-1) {
-					id_plus_one = module.name+"/end"
+					id_plus_one = module.name+"/"+String(module.scripts.length+1)
 				}
 				nodelist.push({id: id, color: "gray"});
 				edgelist.push({from: id, to: id_plus_one, label:id, arrows:"to", color: "gray", length:0.1});
@@ -19,7 +19,7 @@ function createVIS() {
 					}
 				}
 			}
-			var id = module.name+"/end";
+			var id = module.name+"/"+String(module.scripts.length+1);
 			nodelist.push({id: id, color: "gray"});
 		}
 		// create a network
@@ -64,11 +64,13 @@ function updatePage() {
 			for (var s in js.modules[m].scripts) {
 				var id="#"+js.modules[m].name+js.modules[m].scripts[s].seq;
 				var scr_obj = js.modules[m].scripts[s];
-				$( id+"-status" ).html(scr_obj.status);
-				$( id+"-status" ).attr("class", "script-span");
-				$( id+"-status" ).addClass(scr_obj.status.toLowerCase());
-				$( id+"-runs" ).html(scr_obj.runs);
-				$( id+"-elapsed_time" ).html(Math.round(scr_obj.elapsed_time*100)/100);
+				if(scr_obj.status) {
+					$( id+"-status" ).html(scr_obj.status);
+					$( id+"-status" ).attr("class", "script-span");
+					$( id+"-status" ).addClass(scr_obj.status.toLowerCase());
+					$( id+"-runs" ).html(scr_obj.runs);
+					$( id+"-elapsed_time" ).html(Math.round(scr_obj.elapsed_time*100)/100);
+				}
 			}
 		}
 		$( "#allocating_resources_time" ).html(Math.round(js.allocating_resources_time*100)/100);
@@ -83,15 +85,23 @@ function updatePage() {
 				keys[js.modules[m].name+"/"+js.modules[m].scripts[s].seq] = js.modules[m].scripts[s].status
 				last_status = js.modules[m].scripts[s].status
 			}
-			keys[js.modules[m].name+"/end"] = last_status
+			keys[js.modules[m].name+"/"+String(js.modules[m].scripts.length+1)] = last_status
 		}
 
 		for (var x in edges.get()) {
 			current = edges.get()[x];
 			color = "#333333";
-			if (keys[current.from] == "DONE" ) {
+			if(current.dashes) {		// that's a message edge
+					var splitted_name = current.from.split("/");
+					var suffix = splitted_name[1];
+					prev_id = splitted_name[0]+"/"+String(parseInt(suffix)-1);
+					if(keys[prev_id] == "DONE") {
+						color="#4CAF50";
+						current.color =  color;
+						edges.update(current);
+					}
+			} else if (keys[current.from] == "DONE" ) {	// everything else is a script edge
 				color="#4CAF50";
-			
 				current.color =  color;
 				edges.update(current);
 
@@ -103,49 +113,40 @@ function updatePage() {
 				b.color = {background: color};
 				nodes.update(b);
 
-			}else if (keys[current.from] == "EXECUTING") {
+			}else if (keys[current.from] == "EXECUTING" ) {
 				color="#3333FF";
 				current.color =  color;
 				edges.update(current);
 
-				//a = nodes.get(current.to)
-				//a.color = {background: color};
-				//nodes.update(a);
+				a = nodes.get(current.to)
+				a.color = {background: color};
+				nodes.update(a);
 
-				b = nodes.get(current.from)
-				b.color = {background: color};
-				nodes.update(b);
+				if (current.from.split("/")[1] == "1") { // if a script is executed, the primary state is cool
+					b = nodes.get(current.from)
+					b.color = {background: "#4CAF50"};
+					nodes.update(b);
+				}
 
-			}else if (keys[current.from] == "ERROR") {
+			}else if (keys[current.from] == "ERROR" ) {
 				color="#FF3333";
 				current.color =  color;
 				edges.update(current);
 
-				//a = nodes.get(current.to)
-				//a.color = {background: color};
-				//nodes.update(a);
-
-				b = nodes.get(current.from)
-				b.color = {background: color};
-				nodes.update(b);
-			}else if (keys[current.from] == "WAITING_FOR_MESSAGE") {
+				a = nodes.get(current.to)
+				a.color = {background: color};
+				nodes.update(a);
+			}else if (keys[current.from] == "WAITING_FOR_MESSAGE") { // just yellow the node
 				color="#cccc00";
-				//current.color =  color;
-				//edges.update(current);
-
-				//a = nodes.get(current.to)
-				//a.color = {background: color};
-				//nodes.update(a);
-
 				b = nodes.get(current.from)
 				b.color = {background: color};
 				nodes.update(b);
-
 			}
 		}
 
 	});
 }
+
 function create_alert(app_id) {
 	$.get("/application/"+app_id+"/json", function (data) {
 		var finalDiv = "<div><table>";
