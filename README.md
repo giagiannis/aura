@@ -35,16 +35,16 @@ You can use the CLI client (bin/aura) to run in standalone mode.
 Example:
 
 ```
-bin/aura example/demo example/aura_configuration.json
+bin/aura example/wordpress conf/aura.yml
 ```
 
-Please see the `example/demo` directory in order to create applications of your own.
+Please see the `example/wordpress` directory in order to create applications of your own.
 
 ### Web Server
 If you want an interactive usage, launch the Web Server with:
 
 ```
-bin/aura-server example/aura_configuration.json
+bin/aura-server conf/aura.yml
 ```
 
 By default, the server is launched at `http://0.0.0.0:8080`, but feel free to change the host and/or port through the configuration file.
