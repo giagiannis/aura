@@ -4,3 +4,4 @@
 .eggs/
 aura.egg-info/
 private/
+*.log
