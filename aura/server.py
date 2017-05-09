@@ -109,12 +109,9 @@ def deployment_status(dep_id):
 def deployment_script_logs(dep_id, module_name, script_seq, log_type):
     if dep_id not in context.deployments:
         abort(404)
-    print "(%s, %s, %s, %s)" % (dep_id, module_name, script_seq, log_type)
     deployment = context.deployments[dep_id].status()
     for m in deployment['modules']:
-        print m
         for s in m['scripts']:
-            print s
             if m['name'] == module_name and script_seq == str(s['seq']):
                 if log_type == 'stdout' or log_type == 'stderr':
                     if log_type in s:

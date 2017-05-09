@@ -228,6 +228,7 @@ class VMOrchestrator:
         script_file = self.__transfer_content(content)
         args_file = self.__transfer_content(args)
         self.__ssh.exec_command("chmod +x %s" % script_file)
+        sleep(.100) # we had incident where chmod had not committed its results
         stdin, stdout, stderr = self.__ssh.exec_command("%s %s" % (script_file, args_file))
         stdout_str = stdout.read()
         stderr_str = stderr.read()
