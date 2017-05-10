@@ -1,0 +1,69 @@
+{
+	"name": "Hadoop",
+	"description": "Apache Hadoop 2.7.3 installation", 
+	"modules": [{
+		"name": "hadoop-master",
+		"image_id": "7adcc884-2062-46ce-b8a4-477a6317f67d",
+		"flavor_id": "11",
+		"scripts": [{
+			"seq": 1,
+			"file": "master/setup_ssh_key.sh",
+			"output":["hadoop-slave/1"]
+		},
+		{
+			"seq": 2,
+			"file": "master/setup_hosts.sh",
+			"input": ["hadoop-slave/2"],
+			"output": ["hadoop-slave/3"]
+		},
+		{
+			"seq": 3,
+			"file": "common/install.sh"
+		}, 
+		{
+			"seq": 4,
+			"file": "common/configure.sh"
+		},
+		{
+			"seq": 5,
+			"file": "master/start_cluster.sh",
+			"input": ["hadoop-slave/5"]
+		}]
+	},{
+		"name": "hadoop-slave",
+		"image_id": "7adcc884-2062-46ce-b8a4-477a6317f67d",
+		"flavor_id": "11",
+		"scripts": [{
+			"seq": 1,
+			"file": "slave/setup_ssh_key.sh",
+			"input":["hadoop-master/1"]
+		},
+		{
+			"seq": 2,
+			"file": "slave/send_ip.sh",
+			"output": ["hadoop-master/2"]
+		},
+		{
+			"seq": 3,
+			"file": "slave/setup_hosts.sh",
+			"input":["hadoop-master/2"]
+		},
+		{
+			"seq": 4,
+			"file": "common/install.sh"
+		},
+		{
+			"seq": 5,
+			"file": "common/configure.sh",
+			"output":["hadoop-master/5"]
+		}]
+	}],
+	"cloud-conf": {
+		"version":"",
+		"username":"",
+		"password":"",
+		"project_id":"",
+		"auth_url":"",
+		"network_name": ""
+	}
+}

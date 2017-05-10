@@ -8,6 +8,7 @@ prv_key: "private/image_key"
 applications:
         - "example/demo"
         - "example/wordpress"
+        - "example/hadoop"
 
 logging:
         file: "aura.log"
