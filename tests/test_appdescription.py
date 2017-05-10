@@ -21,6 +21,9 @@ class TestDescription(unittest.TestCase):
             if pref not in result:
                 result[pref]=0
             result[pref]+=1
-        for key in result:
-            self.assertEqual(result[key], multi[key])
+        for key in multi:
+            if key in result and key in multi:
+                self.assertEqual(result[key], multi[key])
+            else:
+                self.assertEqual(multi[key], 1)
 
