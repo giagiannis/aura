@@ -190,7 +190,7 @@ class VMOrchestrator:
                 break
         script['status']='FINISHED'
         script['elapsed_time'] = time()-start_time
-        logging.info("%s: stdout (%s) and stderr (%s)" % (graph_node_id, o, e))
+        #logging.info("%s: stdout (%s) and stderr (%s)" % (graph_node_id, o, e))
         if "output" in script:
             script['status']='SENDING_OUTPUT'
             for x in script['output']:
