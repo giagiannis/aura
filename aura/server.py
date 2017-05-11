@@ -29,6 +29,17 @@ class AURAContext:
 
         self.config = conf
 
+    def refresh_applications(self):
+        for app_id in self.applications:
+            app = self.applications[app_id]
+            parser = ApplicationDescriptionParser(app['path'])
+            del self.applications[app_id]
+            desc = parser.get_description()
+            desc['path'] = app['path']
+            desc['id'] = app_id
+            self.applications[desc['id']] = desc
+
+
 global context
 context = AURAContext()
 
@@ -40,6 +51,12 @@ def index():
 @app.route("/application/")
 def application_list():
     return render_template("application_list.html", apps = context.applications.values())
+
+@app.route("/application/refresh")
+def application_refresh():
+    context.refresh_applications()
+    return redirect('/application/')
+
 
 @app.route("/application/<app_id>")
 def application_show(app_id):
