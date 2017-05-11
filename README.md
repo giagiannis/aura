@@ -5,6 +5,15 @@ About
 -----
 AURA is an Openstack application deployment tool with error-recovery enhancements.
 
+Video Demonstration
+-------------------
+
+In the following links you can view a video demonstration of AURA for a Wordpress and a Hadoop deployment:
+
+[![AURA - Wordpress Installation](https://img.youtube.com/vi/lBAST5GPHaI/0.jpg)](http://www.youtube.com/watch?v=lBAST5GPHaI "AURA - Wordpress Installation")
+
+[![AURA - Hadoop Installation](https://img.youtube.com/vi/jP3hmU7kvfk/0.jpg)](http://www.youtube.com/watch?v=jP3hmU7kvfk "AURA - Hadoop Installation")
+
 Installation
 ------------
 Fork this repository and install the requirements with pip:
