@@ -8,6 +8,9 @@ sys.path.append(".")
 from aura.server import app, AURAContext, context
 
 if __name__ == "__main__":
+    if len(sys.argv)<2:
+        print "Provide configuration file as first argument"
+        sys.exit(1)
     conf = yaml.load(open(sys.argv[1]))
     context.allocate(conf)
     logging.basicConfig(filename=conf['logging']['file'],level=logging.INFO)
