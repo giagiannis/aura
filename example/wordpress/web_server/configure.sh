@@ -1,4 +1,13 @@
 #!/bin/bash
+
+CHANCE="0.60"
+if [ "$(printf "%0.2f\n" $(echo print "$RANDOM/32767." | perl))" \< "$CHANCE" ]; then
+	echo "Failed script" 1>&2 
+	sleep 1
+	exit 0
+fi
+
+
 # parsing input
 DATABASE_HOST=$(cat $1 | cut -d, -f1)
 DATABASE_NAME=$(cat $1 | cut -d, -f2)
