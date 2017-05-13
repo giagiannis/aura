@@ -11,7 +11,7 @@
 	{% for m in deployment.modules %}
 	{% for s in m.scripts %}
 	<tr>
-		<td>{{ m.name }}/{{s.seq}}</td>
+		<td><a title='{{m.name}}/{{s.seq}} content' href='javascript:void(0)' onclick='show_logs("{{m.name}}/{{s.seq}}")' class='nolink'>{{ m.name }}/{{s.seq}}</a></td>
 		<td><span id='{{m.name}}{{s.seq}}-status'></span></td>
 		<td><span id='{{m.name}}{{s.seq}}-runs'></span></td>
 		<td><span style='float:right;' id='{{m.name}}{{s.seq}}-elapsed_time'></span></td>

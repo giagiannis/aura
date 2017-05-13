@@ -181,3 +181,23 @@ function my_dialog_handler(ids, app_id) {
 }
 
 
+
+function show_logs(script) {
+	var a= script.split("/");
+	var module_name = a[0], script_seq = parseInt(a[1]);
+	var finalDiv = "<div>";
+	finalDiv = finalDiv + "<textarea class='console' readonly>";
+	a = $.get( window.location.href+"/status", function( data ) {
+		js = JSON.parse(data);
+		for (i in js.modules){
+			for (j in js.modules[i].scripts) {
+				if (js.modules[i].name == module_name && js.modules[i].scripts[j].seq == script_seq) {
+					finalDiv = finalDiv + js.modules[i].scripts[j]["file-content"];
+				}
+			}
+		}
+		finalDiv = finalDiv + "</textarea>";
+		finalDiv = finalDiv + "</div>";
+		$( finalDiv ).dialog({height:"auto", width:"600px", title: script+" content"})
+	})
+}

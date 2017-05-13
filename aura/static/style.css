@@ -131,3 +131,8 @@ h1, h2{
 	background: #006bd6;
 	color: white;
 }
+
+.nolink {
+	color: #000000;
+	text-decoration: none;
+}
