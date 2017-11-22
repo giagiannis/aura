@@ -109,7 +109,9 @@ class CloudOrchestrator:
                 conf['username'],\
                 conf['password'],\
                 conf['project_id'],\
-                conf['auth_url'], connection_pool = True)
+                conf['auth_url'], 
+                user_domain_name = conf['domain'],
+                connection_pool = True,)
         logging.info("Openstack access established")
 
     def create_vm(self, name, flavor, image, key):
