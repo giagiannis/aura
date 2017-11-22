@@ -11,7 +11,7 @@ function append_conf_option() {
 CORES="$(cat /proc/cpuinfo | grep processor | wc -l)"
 MEM="$(cat /proc/meminfo | grep MemTotal| awk '{printf $2/1024}' | cut -d. -f1)"
 
-HADOOP_DIR="/opt/hadoop-2.7.3"
+HADOOP_DIR="/opt/hadoop-2.7.4"
 
 # configure core-site.xml
 CONF_FILE="$HADOOP_DIR/etc/hadoop/core-site.xml"
