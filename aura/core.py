@@ -56,7 +56,7 @@ class ApplicationDeployment:
         start = time()
         orchestrators = []
         for m in self.__desc['modules']:
-            snap_type, snap_path = 'aufs', '/opt'
+            snap_type, snap_path = 'btrfs', '/opt'
             if 'snapshot_type' in m:
                 snap_type = m['snapshot_type']
             if 'snapshot_path' in m:
@@ -462,7 +462,7 @@ class SnapshotManager:
         if manType == "aufs":
             return AUFSSnapshotManager(path)
         if manType == "btrfs":
-            return None
+            return BTRFSSnapshotManager(path)
         return None
 
 class AUFSSnapshotManager(SnapshotManager):
@@ -497,21 +497,39 @@ class BTRFSSnapshotManager(SnapshotManager):
     def __init__(self,path):
         SnapshotManager.__init__(self, path)
         self.layers = []
+        self.__mgt_path="/mgt"
+        self.__subvol_name="data"
+        self.__device = "/tmp/%s.img" % self.random_string_generator()
 
     def configure(self):
         return """
+        DEV_NAME="%s"
+        MGT_PATH="%s"
+        DATA_PATH="%s"
+        SUB_NAME="%s"
+
         apt-get update && apt-get install kpartx -y
-        modprobe aufs
-        """
+        truncate -s 10G $DEV_NAME
+        kpartx -av $DEV_NAME
+        DEV=$(losetup  | grep $DEV_NAME | awk '{print $1}')
+        mkfs.btrfs $DEV
+        mkdir $MGT_PATH
+        mount $DEV $MGT_PATH
+        btrfs subvolume create $MGT_PATH/$SUB_NAME
+        TMP_DIR=/tobedeleted
+        mkdir $TMP_DIR
+        mount -o subvol=$SUB_NAME $DEV $TMP_DIR
+        cp -r $DATA_PATH/* $TMP_DIR/
+        umount $TMP_DIR
+        mount -o subvol=$SUB_NAME $DEV $DATA_PATH
+        """ %(self.__device, self.__mgt_path, self.path, self.__subvol_name)
 
     def create_layer(self):
-        layer = "/tmp/aufs_layer_%d" % (len(self.layers))
+        layer = "%s/layer_%d" % (self.__mgt_path, len(self.layers))
         self.layers.append(layer)
         return """
-        mkdir %s
-        umount %s
-        mount -t aufs -o br=%s none %s
-        """ % (layer, self.path, ':'.join(reversed([self.path]+self.layers)), self.path)
+        btrfs subvolume snapshot %s %s
+        """ % (self.path, layer)
 
     def delete_layer(self):
         if len(self.layers) == 0:
@@ -519,7 +537,14 @@ class BTRFSSnapshotManager(SnapshotManager):
         last = self.layers[len(self.layers)-1]
         del self.layers[len(self.layers)-1]
         return """
-        umount %s
-        rm -r %s
-        mount -t aufs -o br=%s none %s
-        """ % (self.path, ':'.join(reversed(self.layers)), self.path)
+        MGT_PATH="%s"
+        DATA_PATH="%s"
+        SUB_NAME="%s"
+        SNAPSHOT="%s"
+        DEV=$(losetup  | grep %s | awk '{print $1}')
+
+        umount $DATA_PATH
+        btrfs subvolume delete $MGT_PATH/$SUB_NAME 
+        mv $SNAPSHOT $MGT_PATH/$SUB_NAME
+        mount -o subvol=$SUB_NAME $DEV $DATA_PATH
+        """ % (self.__mgt_path, self.path, self.__subvol_name, last, self.__device)
