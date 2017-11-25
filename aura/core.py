@@ -11,6 +11,8 @@ import threading
 import tarfile
 import json
 import logging
+import random
+import string
 
 
 
@@ -54,7 +56,13 @@ class ApplicationDeployment:
         start = time()
         orchestrators = []
         for m in self.__desc['modules']:
-            o = VMOrchestrator(self.__queue, m, self.__aura_conf['prv_key'])
+            snap_type, snap_path = 'aufs', '/opt'
+            if 'snapshot_type' in m:
+                snap_type = m['snapshot_type']
+            if 'snapshot_path' in m:
+                snap_path = m['snapshot_path']
+            o = VMOrchestrator(self.__queue, m, self.__aura_conf['prv_key'], 
+                    snap_type, snap_path)
             orchestrators.append(o)
 
         for o in orchestrators:
@@ -137,7 +145,9 @@ class CloudOrchestrator:
 
 
 class VMOrchestrator:
-    def __init__(self, queue, module, key_file):
+    def __init__(self, queue, module, key_file, snap_type, snap_path):
+        
+        self.__snap = SnapshotManager.factory(snap_type, snap_path)
         self.__queue = queue
         self.__module = module
         self.__prv_key = key_file
@@ -161,6 +171,8 @@ class VMOrchestrator:
             sleep(1.0)
 
     def execute_scripts(self):
+        logging.info("SNAP %s: %s" % (self.__module['name'], self.__snap.configure()))
+        self.__transfer_and_run(self.__snap.configure(), "")
         for s in self.__module['scripts']:
             self.__execute_script(s)
         flag = reduce(lambda x,y : x&y, [s['status'] == 'DONE' for s in self.__module['scripts']])
@@ -180,6 +192,10 @@ class VMOrchestrator:
         start_time = time()
         script['runs'] = 0
         while True:
+            snap_cmd = self.__snap.create_layer()
+            o,e = self.__transfer_and_run(snap_cmd, "")
+            logging.info("SNAP: %s\nout:%s\nerr:%s" % (snap_cmd, o, e))
+
             script['runs']+=1
             logging.info("Executing %s" % script['file'])
             script['status'] = 'EXECUTING'
@@ -188,6 +204,10 @@ class VMOrchestrator:
             if e!="":
                 script['status'] = 'ERROR'
                 sleep(5.0)
+
+                snap_cmd = self.__snap.delete_layer()
+                o,e=self.__transfer_and_run(snap_cmd, "")
+                logging.info("SNAP: %s\nout:%s\nerr:%s" % (snap_cmd, o, e))
             else:
                 break
         script['status']='FINISHED'
@@ -234,6 +254,7 @@ class VMOrchestrator:
         stdin, stdout, stderr = self.__ssh.exec_command("%s %s" % (script_file, args_file))
         stdout_str = stdout.read()
         stderr_str = stderr.read()
+        self.__ssh.exec_command("rm -f %s %s" % (script_file, args_file))
         return stdout_str, stderr_str
 
     def __transfer_content(self, content):
@@ -286,6 +307,7 @@ class ApplicationDescriptionParser:
         return self.__content
 
     def expand_description(self):
+        logging.info("Expanding description")
         new_one = dict()
         new_one['name'] = deepcopy(self.__content['name'])
         new_one['description'] = deepcopy(self.__content['description'])
@@ -301,11 +323,16 @@ class ApplicationDescriptionParser:
 
             # replicating for each VM
             if 'multiplicity' not in m or m['multiplicity'] == 1:
-                new_one['modules'].append(deepcopy(m))
+                new_m = deepcopy(m)
+                if 'address' in new_m and isinstance(new_m['address'],list):
+                    new_m['address'] = new_m['address'][0]
+                new_one['modules'].append(new_m)
             else:   # do your shit
                 for i in range(1, m['multiplicity']+1):
                     new_m = deepcopy(m)
                     new_m['name'] = "%s%d" %(new_m['name'], i)
+                    if 'address' in new_m and i<=len(new_m['address']):
+                        new_m['address'] = new_m['address'][i-1]
                     new_one['modules'].append(new_m)
 
         for vm in new_one['modules']:
@@ -331,12 +358,13 @@ class ApplicationDescriptionParser:
                     if len(new_output)>0:
                         del(s['output'])
                         s['output'] = new_output
+        logging.info("Expanded description: %s" % (str(new_one)))
         return new_one
 
 class Queue:
     """
-    Queue class implements a simple queing mechanism used by different VMOrchestrators
-    to exchange messages
+    Queue class implements a simple queing mechanism used by different 
+    VMOrchestrators to exchange messages
     """
     def __init__(self):
         self.__queue = dict()
@@ -408,3 +436,90 @@ class Queue:
     
     def __str__(self):
         return str(self.__queue)
+
+class SnapshotManager:
+    """
+    The SnapshotManager is internally used by a VM orchestrator to snapshot the
+    filesystem in order to elliminate script side effects.
+    """
+    def __init__(self, path):
+        """Method used to initialize the Manager"""
+        self.path = path
+
+    def create_layer(self):
+        """Stacks a new layer on top of the existing ones"""
+        raise NotImplementedError("To be defined")
+
+    def delete_layer(self):
+        """Deletes the topmost layer"""
+        raise NotImplementedError("To be defined")
+
+    def random_string_generator(self, size=10):
+        return ''.join([random.choice(string.ascii_lowercase + string.digits) for x in range(0, size)])
+
+    @staticmethod
+    def factory(manType, path):
+        if manType == "aufs":
+            return AUFSSnapshotManager(path)
+        if manType == "btrfs":
+            return None
+        return None
+
+class AUFSSnapshotManager(SnapshotManager):
+    def __init__(self,path):
+        SnapshotManager.__init__(self, path)
+        self.layers = []
+
+    def configure(self):
+        return "modprobe aufs"
+
+    def create_layer(self):
+        layer = "/tmp/aufs_layer_%d" % (len(self.layers))
+        self.layers.append(layer)
+        return """
+        mkdir %s
+        umount %s
+        mount -t aufs -o br=%s none %s
+        """ % (layer, self.path, ':'.join(reversed([self.path]+self.layers)), self.path)
+
+    def delete_layer(self):
+        if len(self.layers) == 0:
+            return
+        last = self.layers[len(self.layers)-1]
+        del self.layers[len(self.layers)-1]
+        return """
+        umount %s
+        rm -r %s
+        mount -t aufs -o br=%s none %s
+        """ % (self.path, last, ':'.join(reversed([self.path]+self.layers)), self.path)
+
+class BTRFSSnapshotManager(SnapshotManager):
+    def __init__(self,path):
+        SnapshotManager.__init__(self, path)
+        self.layers = []
+
+    def configure(self):
+        return """
+        apt-get update && apt-get install kpartx -y
+        modprobe aufs
+        """
+
+    def create_layer(self):
+        layer = "/tmp/aufs_layer_%d" % (len(self.layers))
+        self.layers.append(layer)
+        return """
+        mkdir %s
+        umount %s
+        mount -t aufs -o br=%s none %s
+        """ % (layer, self.path, ':'.join(reversed([self.path]+self.layers)), self.path)
+
+    def delete_layer(self):
+        if len(self.layers) == 0:
+            return
+        last = self.layers[len(self.layers)-1]
+        del self.layers[len(self.layers)-1]
+        return """
+        umount %s
+        rm -r %s
+        mount -t aufs -o br=%s none %s
+        """ % (self.path, ':'.join(reversed(self.layers)), self.path)
