@@ -191,10 +191,14 @@ class VMOrchestrator:
                 args += self.__queue.block_receive(graph_node_id, i)
         start_time = time()
         script['runs'] = 0
+        if 'snap_time' not in script:
+            script['snap_time'] = 0
         while True:
+            start_time_snap = time()
             snap_cmd = self.__snap.create_layer()
             o,e = self.__transfer_and_run(snap_cmd, "")
             logging.info("SNAP: %s\nout:%s\nerr:%s" % (snap_cmd, o, e))
+            script['snap_time'] += time() - start_time_snap
 
             script['runs']+=1
             logging.info("Executing %s" % script['file'])
@@ -205,9 +209,11 @@ class VMOrchestrator:
                 script['status'] = 'ERROR'
                 sleep(5.0)
 
+                start_time_snap = time()
                 snap_cmd = self.__snap.delete_layer()
                 o,e=self.__transfer_and_run(snap_cmd, "")
                 logging.info("SNAP: %s\nout:%s\nerr:%s" % (snap_cmd, o, e))
+                script['snap_time'] += time() - start_time_snap
             else:
                 break
         script['status']='FINISHED'

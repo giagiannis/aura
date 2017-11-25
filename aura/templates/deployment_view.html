@@ -7,7 +7,7 @@
 
 <h2> Script Execution status </h2>
 <table class=tablelist>
-	<tr><th>Script</th><th>Status</th><th># runs</th><th>Elapsed time (sec)</th><th>Logs</th></tr>
+		<tr><th>Script</th><th>Status</th><th># runs</th><th>Elapsed time (sec)</th><th>Snapshot time (sec)</th><th>Logs</th></tr>
 	{% for m in deployment.modules %}
 	{% for s in m.scripts %}
 	<tr>
@@ -15,6 +15,7 @@
 		<td><span id='{{m.name}}{{s.seq}}-status'></span></td>
 		<td><span id='{{m.name}}{{s.seq}}-runs'></span></td>
 		<td><span style='float:right;' id='{{m.name}}{{s.seq}}-elapsed_time'></span></td>
+		<td><span style='float:right;' id='{{m.name}}{{s.seq}}-snap_time'></span></td>
 		<td>
 			<a class="link logs" href='/deployments/{{deployment.id}}/{{m.name}}/{{s.seq}}/stdout/'>STDOUT</a> 
 			<a class="link logs" href='/deployments/{{deployment.id}}/{{m.name}}/{{s.seq}}/stderr/'>STDERR</a> 

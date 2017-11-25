@@ -70,6 +70,7 @@ function updatePage() {
 					$( id+"-status" ).addClass(scr_obj.status.toLowerCase());
 					$( id+"-runs" ).html(scr_obj.runs);
 					$( id+"-elapsed_time" ).html(Math.round(scr_obj.elapsed_time*100)/100);
+					$( id+"-snap_time" ).html(Math.round(scr_obj.snap_time*100)/100);
 				}
 			}
 		}
